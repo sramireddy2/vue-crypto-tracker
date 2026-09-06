@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import App from './App.vue'
-import { Line } from 'vue-chartjs'
+import './style.css'
 
-const app = createApp(App)
-app.component('line-chart', Line)
-app.mount('#app')
+createApp(App).use(createPinia()).mount('#app')

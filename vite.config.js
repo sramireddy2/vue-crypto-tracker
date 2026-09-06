@@ -4,5 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), tailwindcss(),]
+  base: '/vue-crypto-tracker/',
+  plugins: [vue(), tailwindcss()],
 })

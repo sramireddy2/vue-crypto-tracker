@@ -1,90 +1,126 @@
 <template>
-    <div class="max-w-4xl mx-auto mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Bitcoin – Last 7 Days</h2>
-        <button @click="refresh" class="px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition">
-          Refresh
-        </button>
+  <section class="rounded-2xl border border-line bg-navy p-4">
+    <div class="mb-4 flex items-start justify-between gap-3">
+      <div>
+        <p class="text-xs uppercase tracking-wider text-muted">7-day chart</p>
+        <h2 class="mt-1 text-base font-semibold text-ink">
+          {{ coin ? `${coin.name} · ${coin.symbol.toUpperCase()}` : 'Select a coin' }}
+        </h2>
       </div>
-      <line-chart v-if="chartData" :chart-data="chartData" :chart-options="chartOptions" />
+      <p v-if="coin" class="text-sm font-medium" :class="changeClass">
+        {{ formatPercent(coin.price_change_percentage_24h) }}
+      </p>
     </div>
-  </template>
-  
-  <script setup>
-  import { ref, onMounted } from 'vue'
-  import axios from 'axios'
-  import {
-    Chart as ChartJS,
-    Title,
-    Tooltip,
-    Legend,
-    LineElement,
-    PointElement,
-    CategoryScale,
-    LinearScale
-  } from 'chart.js'
-  import { Line } from 'vue-chartjs'
-  
-  // Register Chart.js modules
-  ChartJS.register(
-    Title,
-    Tooltip,
-    Legend,
-    LineElement,
-    PointElement,
-    CategoryScale,
-    LinearScale
-  )
-  
-  const chartData = ref(null)
-  const chartOptions = {
-    responsive: true,
-    scales: {
-      x: {
-        grid: { display: false },
-        ticks: { color: '#6B7280' }
+
+    <div v-if="loading" class="flex h-48 items-center justify-center text-sm text-muted">
+      Loading chart…
+    </div>
+    <div v-else-if="error" class="flex h-48 items-center justify-center text-sm text-down">
+      {{ error }}
+    </div>
+    <div v-else-if="chartData" class="h-48">
+      <Line :data="chartData" :options="chartOptions" />
+    </div>
+  </section>
+</template>
+
+<script setup>
+import { computed, ref, watch } from 'vue'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+} from 'chart.js'
+import { Line } from 'vue-chartjs'
+import { useMarketStore } from '../stores/market'
+import { fetchMarketChart } from '../services/coingecko'
+import { formatPercent, formatPrice } from '../utils/format'
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip)
+
+const store = useMarketStore()
+const coin = computed(() => store.selectedCoin)
+const loading = ref(false)
+const error = ref(null)
+const prices = ref([])
+let requestId = 0
+
+const changeClass = computed(() => (
+  (coin.value?.price_change_percentage_24h ?? 0) >= 0 ? 'text-up' : 'text-down'
+))
+
+const chartData = computed(() => {
+  if (!prices.value.length) return null
+  return {
+    labels: prices.value.map(([ts]) => new Date(ts).toLocaleDateString()),
+    datasets: [
+      {
+        data: prices.value.map(([, value]) => value),
+        borderColor: '#3B82F6',
+        backgroundColor: 'rgba(59, 130, 246, 0.12)',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.3,
       },
-      y: {
-        grid: { color: 'rgba(107, 114, 128, 0.2)' },
-        ticks: { color: '#6B7280' }
-      }
+    ],
+  }
+})
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  interaction: { intersect: false, mode: 'index' },
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        label: (ctx) => formatPrice(ctx.parsed.y),
+      },
     },
-    plugins: {
-      legend: { display: false }
+  },
+  scales: {
+    x: {
+      grid: { display: false },
+      ticks: { color: '#8B9BB4', maxTicksLimit: 6 },
+      border: { display: false },
     },
-    elements: {
-      line: { tension: 0.3, borderColor: '#6366F1' },
-      point: { radius: 4, backgroundColor: '#6366F1' }
-    }
+    y: {
+      grid: { color: 'rgba(30, 45, 74, 0.8)' },
+      ticks: {
+        color: '#8B9BB4',
+        callback: (value) => formatPrice(value),
+      },
+      border: { display: false },
+    },
+  },
+}
+
+async function loadChart(id) {
+  if (!id) return
+  const current = ++requestId
+  loading.value = true
+  error.value = null
+  try {
+    const next = await fetchMarketChart(id, 7)
+    if (current !== requestId) return
+    prices.value = next
+  } catch {
+    if (current !== requestId) return
+    prices.value = []
+    error.value = 'Chart unavailable right now.'
+  } finally {
+    if (current === requestId) loading.value = false
   }
-  
-  async function fetchHistory() {
-    const res = await axios.get(
-      'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart',
-      { params: { vs_currency: 'usd', days: 7 } }
-    )
-    const prices = res.data.prices
-    chartData.value = {
-      labels: prices.map(p => new Date(p[0]).toLocaleDateString()),
-      datasets: [
-        {
-          label: 'BTC USD',
-          data: prices.map(p => p[1]),
-          borderWidth: 2,
-          pointRadius: 3,
-          fill: false
-        }
-      ]
-    }
-  }
-  
-  function refresh() {
-    fetchHistory()
-  }
-  
-  onMounted(fetchHistory)
-  </script>
-  
-  <style scoped>
-  h2 { margin-bottom: 0.5em; }
-  </style>  
+}
+
+watch(
+  () => store.selectedId,
+  (id) => loadChart(id),
+  { immediate: true },
+)
+</script>
