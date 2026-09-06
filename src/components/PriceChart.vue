@@ -1,13 +1,13 @@
 <template>
-  <section class="rounded-2xl border border-line bg-navy p-4">
+  <SpotlightCard tag="section" card-class="p-5">
     <div class="mb-4 flex items-start justify-between gap-3">
       <div>
-        <p class="text-xs uppercase tracking-wider text-muted">7-day chart</p>
-        <h2 class="mt-1 text-base font-semibold text-ink">
+        <p class="label-meta">7-day chart</p>
+        <h2 class="mt-2 text-lg font-semibold tracking-tight text-ink">
           {{ coin ? `${coin.name} · ${coin.symbol.toUpperCase()}` : 'Select a coin' }}
         </h2>
       </div>
-      <p v-if="coin" class="text-sm font-medium" :class="changeClass">
+      <p v-if="coin" class="font-mono text-sm" :class="changeClass">
         {{ formatPercent(coin.price_change_percentage_24h) }}
       </p>
     </div>
@@ -21,7 +21,7 @@
     <div v-else-if="chartData" class="h-48">
       <Line :data="chartData" :options="chartOptions" />
     </div>
-  </section>
+  </SpotlightCard>
 </template>
 
 <script setup>
@@ -39,6 +39,7 @@ import { Line } from 'vue-chartjs'
 import { useMarketStore } from '../stores/market'
 import { fetchMarketChart } from '../services/coingecko'
 import { formatPercent, formatPrice } from '../utils/format'
+import SpotlightCard from './SpotlightCard.vue'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip)
 
@@ -60,8 +61,8 @@ const chartData = computed(() => {
     datasets: [
       {
         data: prices.value.map(([, value]) => value),
-        borderColor: '#3B82F6',
-        backgroundColor: 'rgba(59, 130, 246, 0.12)',
+        borderColor: '#5E6AD2',
+        backgroundColor: 'rgba(94, 106, 210, 0.14)',
         borderWidth: 2,
         pointRadius: 0,
         fill: true,
@@ -86,13 +87,14 @@ const chartOptions = {
   scales: {
     x: {
       grid: { display: false },
-      ticks: { color: '#8B9BB4', maxTicksLimit: 6 },
+      ticks: { color: '#8A8F98', maxTicksLimit: 6, font: { family: 'IBM Plex Mono', size: 10 } },
       border: { display: false },
     },
     y: {
-      grid: { color: 'rgba(30, 45, 74, 0.8)' },
+      grid: { color: 'rgba(255, 255, 255, 0.06)' },
       ticks: {
-        color: '#8B9BB4',
+        color: '#8A8F98',
+        font: { family: 'IBM Plex Mono', size: 10 },
         callback: (value) => formatPrice(value),
       },
       border: { display: false },

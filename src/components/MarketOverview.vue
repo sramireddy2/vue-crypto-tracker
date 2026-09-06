@@ -1,9 +1,16 @@
 <template>
-  <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-    <article v-for="card in cards" :key="card.label" class="rounded-2xl border border-line bg-navy p-4">
-      <p class="text-xs uppercase tracking-wider text-muted">{{ card.label }}</p>
-      <p class="mt-2 text-xl font-semibold text-ink">{{ card.value }}</p>
-    </article>
+  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+    <SpotlightCard
+      v-for="(card, index) in cards"
+      :key="card.label"
+      tag="article"
+      :card-class="index < 2 ? 'xl:col-span-2 p-6' : 'p-6'"
+    >
+      <p class="label-meta">{{ card.label }}</p>
+      <p class="mt-3 text-2xl font-semibold tracking-tight text-ink tabular-nums">
+        {{ card.value }}
+      </p>
+    </SpotlightCard>
   </section>
 </template>
 
@@ -11,6 +18,7 @@
 import { computed } from 'vue'
 import { useMarketStore } from '../stores/market'
 import { formatCompactUsd } from '../utils/format'
+import SpotlightCard from './SpotlightCard.vue'
 
 const store = useMarketStore()
 

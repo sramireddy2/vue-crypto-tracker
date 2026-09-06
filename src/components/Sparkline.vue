@@ -29,7 +29,7 @@ const props = defineProps({
 const width = 96
 const height = 32
 
-const color = computed(() => (props.up ? '#22d3a6' : '#f43f5e'))
+const color = computed(() => (props.up ? '#3DD68C' : '#F16B7A'))
 
 const points = computed(() => {
   const values = (props.prices || []).filter((n) => Number.isFinite(n))

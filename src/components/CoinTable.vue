@@ -1,67 +1,67 @@
 <template>
-  <section class="overflow-hidden rounded-2xl border border-line bg-navy">
-    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
-      <div class="flex items-center gap-2">
+  <SpotlightCard tag="section">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3">
+      <div class="flex items-center gap-1">
         <button
           v-for="tab in tabs"
           :key="tab.id"
-          class="rounded-lg px-3 py-1.5 text-sm transition"
-          :class="activeTab === tab.id
-            ? 'bg-accent/15 text-accent-soft'
-            : 'text-muted hover:bg-navy-light hover:text-ink'"
+          type="button"
+          class="btn-ghost"
+          :class="activeTab === tab.id ? 'is-active' : ''"
           @click="activeTab = tab.id"
         >
           {{ tab.label }}
         </button>
       </div>
-      <p class="text-xs text-muted">{{ rows.length }} coins</p>
+      <p class="font-mono text-[11px] tracking-wide text-muted">{{ rows.length }} coins</p>
     </div>
 
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
-        <thead class="text-left text-xs uppercase tracking-wider text-muted">
-          <tr class="border-b border-line">
+        <thead class="text-left">
+          <tr class="border-b border-white/[0.06]">
             <th class="px-3 py-3 font-medium"> </th>
-            <th class="cursor-pointer px-2 py-3 font-medium" @click="sortBy('market_cap_rank')">#</th>
-            <th class="cursor-pointer px-3 py-3 font-medium" @click="sortBy('name')">Coin</th>
-            <th class="cursor-pointer px-3 py-3 text-right font-medium" @click="sortBy('current_price')">Price</th>
-            <th class="hidden cursor-pointer px-3 py-3 text-right font-medium md:table-cell" @click="sortBy('price_change_percentage_1h_in_currency')">1h</th>
-            <th class="cursor-pointer px-3 py-3 text-right font-medium" @click="sortBy('price_change_percentage_24h')">24h</th>
-            <th class="hidden cursor-pointer px-3 py-3 text-right font-medium lg:table-cell" @click="sortBy('price_change_percentage_7d_in_currency')">7d</th>
-            <th class="hidden cursor-pointer px-3 py-3 text-right font-medium lg:table-cell" @click="sortBy('market_cap')">Mkt cap</th>
-            <th class="hidden cursor-pointer px-3 py-3 text-right font-medium xl:table-cell" @click="sortBy('total_volume')">Volume</th>
-            <th class="hidden px-3 py-3 text-right font-medium sm:table-cell">7d</th>
+            <th class="label-meta cursor-pointer px-2 py-3" @click="sortBy('market_cap_rank')">#</th>
+            <th class="label-meta cursor-pointer px-3 py-3" @click="sortBy('name')">Coin</th>
+            <th class="label-meta cursor-pointer px-3 py-3 text-right" @click="sortBy('current_price')">Price</th>
+            <th class="label-meta hidden cursor-pointer px-3 py-3 text-right md:table-cell" @click="sortBy('price_change_percentage_1h_in_currency')">1h</th>
+            <th class="label-meta cursor-pointer px-3 py-3 text-right" @click="sortBy('price_change_percentage_24h')">24h</th>
+            <th class="label-meta hidden cursor-pointer px-3 py-3 text-right lg:table-cell" @click="sortBy('price_change_percentage_7d_in_currency')">7d</th>
+            <th class="label-meta hidden cursor-pointer px-3 py-3 text-right lg:table-cell" @click="sortBy('market_cap')">Mkt cap</th>
+            <th class="label-meta hidden cursor-pointer px-3 py-3 text-right xl:table-cell" @click="sortBy('total_volume')">Volume</th>
+            <th class="label-meta hidden px-3 py-3 text-right sm:table-cell">7d</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="coin in rows"
             :key="coin.id"
-            class="cursor-pointer border-b border-line/70 transition hover:bg-navy-light"
-            :class="store.selectedId === coin.id ? 'bg-accent/5' : ''"
+            class="cursor-pointer border-b border-white/[0.04] transition-colors duration-200 hover:bg-white/[0.04]"
+            :class="store.selectedId === coin.id ? 'bg-accent/[0.08]' : ''"
             @click="store.selectCoin(coin.id)"
           >
             <td class="px-3 py-3">
               <button
-                class="text-lg leading-none"
-                :class="store.isWatched(coin.id) ? 'text-accent-soft' : 'text-muted hover:text-ink'"
+                type="button"
+                class="text-base leading-none transition-colors duration-200"
+                :class="store.isWatched(coin.id) ? 'text-accent-bright' : 'text-muted hover:text-ink'"
                 :aria-label="store.isWatched(coin.id) ? 'Remove from watchlist' : 'Add to watchlist'"
                 @click.stop="store.toggleWatch(coin.id)"
               >
                 {{ store.isWatched(coin.id) ? '★' : '☆' }}
               </button>
             </td>
-            <td class="px-2 py-3 text-muted">{{ coin.market_cap_rank ?? '—' }}</td>
+            <td class="px-2 py-3 font-mono text-muted">{{ coin.market_cap_rank ?? '—' }}</td>
             <td class="px-3 py-3">
               <div class="flex items-center gap-3">
                 <img :src="coin.image" :alt="coin.name" class="h-7 w-7 rounded-full" />
                 <div>
-                  <p class="font-medium text-ink">{{ coin.name }}</p>
-                  <p class="text-xs uppercase text-muted">{{ coin.symbol }}</p>
+                  <p class="font-medium tracking-tight text-ink">{{ coin.name }}</p>
+                  <p class="font-mono text-[11px] uppercase text-muted">{{ coin.symbol }}</p>
                 </div>
               </div>
             </td>
-            <td class="px-3 py-3 text-right font-medium">
+            <td class="px-3 py-3 text-right font-mono font-medium">
               <span
                 :key="live(coin)?.n ?? 0"
                 :class="priceClass(coin)"
@@ -69,19 +69,19 @@
                 {{ formatPrice(store.displayPrice(coin)) }}
               </span>
             </td>
-            <td class="hidden px-3 py-3 text-right md:table-cell" :class="changeClass(coin.price_change_percentage_1h_in_currency)">
+            <td class="hidden px-3 py-3 text-right font-mono md:table-cell" :class="changeClass(coin.price_change_percentage_1h_in_currency)">
               {{ formatPercent(coin.price_change_percentage_1h_in_currency) }}
             </td>
-            <td class="px-3 py-3 text-right" :class="changeClass(coin.price_change_percentage_24h)">
+            <td class="px-3 py-3 text-right font-mono" :class="changeClass(coin.price_change_percentage_24h)">
               {{ formatPercent(coin.price_change_percentage_24h) }}
             </td>
-            <td class="hidden px-3 py-3 text-right lg:table-cell" :class="changeClass(coin.price_change_percentage_7d_in_currency)">
+            <td class="hidden px-3 py-3 text-right font-mono lg:table-cell" :class="changeClass(coin.price_change_percentage_7d_in_currency)">
               {{ formatPercent(coin.price_change_percentage_7d_in_currency) }}
             </td>
-            <td class="hidden px-3 py-3 text-right text-ink lg:table-cell">
+            <td class="hidden px-3 py-3 text-right font-mono text-ink lg:table-cell">
               {{ formatCompactUsd(coin.market_cap) }}
             </td>
-            <td class="hidden px-3 py-3 text-right text-ink xl:table-cell">
+            <td class="hidden px-3 py-3 text-right font-mono text-ink xl:table-cell">
               {{ formatCompactUsd(coin.total_volume) }}
             </td>
             <td class="hidden px-3 py-3 text-right sm:table-cell">
@@ -100,7 +100,7 @@
     <div v-if="!rows.length" class="px-4 py-10 text-center text-sm text-muted">
       {{ emptyMessage }}
     </div>
-  </section>
+  </SpotlightCard>
 </template>
 
 <script setup>
@@ -108,6 +108,7 @@ import { computed, ref } from 'vue'
 import { useMarketStore } from '../stores/market'
 import { formatCompactUsd, formatPercent, formatPrice } from '../utils/format'
 import Sparkline from './Sparkline.vue'
+import SpotlightCard from './SpotlightCard.vue'
 
 const store = useMarketStore()
 const activeTab = ref('all')
@@ -178,19 +179,26 @@ function changeClass(value) {
 
 <style scoped>
 .flash-up {
-  animation: flash-up 0.45s ease;
+  animation: flash-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .flash-down {
-  animation: flash-down 0.45s ease;
+  animation: flash-down 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes flash-up {
-  0% { color: #22d3a6; background: rgba(34, 211, 166, 0.16); }
-  100% { color: #e8eef8; background: transparent; }
+  0% { color: #3dd68c; background: rgba(61, 214, 140, 0.14); }
+  100% { color: #ededef; background: transparent; }
 }
 
 @keyframes flash-down {
-  0% { color: #f43f5e; background: rgba(244, 63, 94, 0.16); }
-  100% { color: #e8eef8; background: transparent; }
+  0% { color: #f16b7a; background: rgba(241, 107, 122, 0.14); }
+  100% { color: #ededef; background: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flash-up,
+  .flash-down {
+    animation: none;
+  }
 }
 </style>

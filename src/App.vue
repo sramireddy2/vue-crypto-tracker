@@ -1,43 +1,66 @@
 <template>
-  <div class="relative min-h-screen bg-page text-ink">
-    <div class="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(ellipse_at_top,_rgba(59,130,246,0.18),_transparent_60%)]"></div>
-    <AppHeader />
+  <div class="relative min-h-screen text-ink">
+    <AmbientBackground />
+    <div class="relative z-10">
+      <AppHeader />
 
-    <main class="relative mx-auto max-w-7xl space-y-6 px-4 py-6">
-      <div v-if="store.loading && !store.coins.length" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div v-for="n in 4" :key="n" class="h-24 animate-pulse rounded-2xl bg-navy"></div>
-      </div>
-
-      <div
-        v-else-if="store.error && !store.coins.length"
-        class="rounded-2xl border border-down/30 bg-navy p-8 text-center"
-      >
-        <p class="text-ink">{{ store.error }}</p>
-        <button
-          class="mt-4 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-soft"
-          @click="store.loadMarkets()"
-        >
-          Retry
-        </button>
-      </div>
-
-      <template v-else>
-        <MarketOverview />
-
-        <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <CoinTable />
-          <div class="space-y-4">
-            <MoversPanel />
-            <PriceChart />
-          </div>
+      <main class="mx-auto max-w-7xl space-y-8 px-4 py-8 md:py-10">
+        <div v-if="store.loading && !store.coins.length" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+          <div
+            v-for="n in 4"
+            :key="n"
+            class="h-28 animate-pulse rounded-2xl bg-white/[0.04]"
+            :class="n < 3 ? 'xl:col-span-2' : ''"
+          ></div>
         </div>
-      </template>
-    </main>
+
+        <div
+          v-else-if="store.error && !store.coins.length"
+          class="surface-card p-8 text-center"
+        >
+          <p class="text-ink">{{ store.error }}</p>
+          <button
+            type="button"
+            class="btn-primary mt-4"
+            @click="store.loadMarkets()"
+          >
+            Retry
+          </button>
+        </div>
+
+        <template v-else>
+          <section class="fade-up">
+            <p class="label-meta text-accent">Markets</p>
+            <h1 class="text-display mt-3 text-3xl font-semibold tracking-tight md:text-5xl">
+              Live crypto markets
+            </h1>
+            <p class="mt-3 max-w-xl text-sm leading-relaxed text-muted md:text-base">
+              Real-time prices across the top 250 assets. Watchlist stays on this device.
+            </p>
+          </section>
+
+          <div class="fade-up" style="animation-delay: 80ms">
+            <MarketOverview />
+          </div>
+
+          <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div class="fade-up min-w-0" style="animation-delay: 140ms">
+              <CoinTable />
+            </div>
+            <div class="fade-up space-y-4" style="animation-delay: 200ms">
+              <MoversPanel />
+              <PriceChart />
+            </div>
+          </div>
+        </template>
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted } from 'vue'
+import AmbientBackground from './components/AmbientBackground.vue'
 import AppHeader from './components/AppHeader.vue'
 import MarketOverview from './components/MarketOverview.vue'
 import CoinTable from './components/CoinTable.vue'
